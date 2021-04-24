@@ -1,20 +1,27 @@
-import { ComponentTree } from "../params/ComponentTree";
+import { ComponentTree } from './../params/ComponentTree';
 import { Methods } from "./requestmethod.decorator";
-export function RequestMapping(url: string, method: Methods) {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    if (ComponentTree.requestRoutes === undefined)
-      ComponentTree.requestRoutes = [];
+import { initTree } from "./util";
+export function RequestMapping(options : any) {
+  if(!options.hasOwnProperty("url"))
+      throw new Error("Property URL must be present")
+  if(!options.hasOwnProperty("method"))
+      throw new Error("Property method must be present")
+      
+  let url = options.url
+  let method = options.method
+  if(!Object.values(Methods).includes(method))
+      throw new Error("Property method must be of type Method")
 
-    ComponentTree.requestRoutes.push({
-      url: url,
-      method: method.toString(),
-      action: propertyKey,
-      class: target.constructor.name,
-      actionMethod: target[propertyKey],
-      filler: target,
-      descriptor: descriptor,
-      parameter_count : getParamNames(target[propertyKey]).length
-    });
+  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    
+    let class_name : string = target.constructor.name.toLowerCase()  
+    let method_name : string = propertyKey.toLowerCase()
+    initTree(class_name, method_name)
+    ComponentTree.components[class_name].methods[method_name].url = url.replace(/\/$/, "");
+    ComponentTree.components[class_name].methods[method_name].action = target[propertyKey]
+    ComponentTree.components[class_name].methods[method_name].parameter_count = getParamNames(target[propertyKey]).length
+    ComponentTree.components[class_name].methods[method_name].method = method.toString()
+
   };
 }
 

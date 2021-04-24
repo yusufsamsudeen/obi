@@ -1,24 +1,17 @@
 import { ComponentTree } from '../params/ComponentTree';
 import { request, response } from "express";
-import callsite from "callsites";
+import { initTree } from './util';
 export function Controller(options: any = {}) {
+  
   return function (constructor: Function) {
     constructor.prototype.request = request;
     constructor.prototype.response = response;
-
-    if (ComponentTree.controllers === undefined) ComponentTree.controllers = [];
-
-    let path: any = callsite()
-      .find((f: any) => f.getFileName()?.includes(constructor.name))
-      ?.getFileName();
-    path = path.substring(path.indexOf("dist"));
-    path = path.replace("\\", "/");
-    ComponentTree.controllers[constructor.name] = {
-      class_name: constructor.name,
-      path: "./" + path,
-      controller : constructor.prototype
-    };
-
+    let constructor_name = constructor.name.toString().toLowerCase()
+    initTree(constructor_name)
+    if(options.hasOwnProperty("url")){
+      ComponentTree.components[constructor_name].base_url= options.url
+    }
+    
   };
 
  
