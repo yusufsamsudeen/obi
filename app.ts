@@ -1,6 +1,9 @@
 import { Methods } from './decorators/requestmethod.decorator';
+import { AuthenticatedMiddleware } from "./middleware/AuthenticatedMiddleware";
 import { ComponentTree } from "./params/ComponentTree";
-import express from "express";
+import express, { NextFunction, Request, Response, Router } from "express";
+// var session = require("express-session")
+import session from "express-session";
 import fs from "fs";
 import path from "path";
 import crayon from "crayon.js";
@@ -10,6 +13,7 @@ export class App {
   private port: number;
   private app: any;
   private baseScan: string;
+  private router: Router = express.Router();
 
   constructor(port: number, baseScan: string) {
     this.port = port;
@@ -27,44 +31,60 @@ export class App {
 
   private bootstrap(): void {
     console.log(crayon.greenYellow("Bootstraping"));
-    console.log(util.inspect(ComponentTree.components, false, null, true));
+    Object.entries<any>(ComponentTree.components).forEach(([index, item]) => {
+     
+      let base_url = item.base_url;
+      Object.entries<any>(item.methods).forEach(([index_, element]) => {
+        let url: string =
+          base_url != null && base_url != undefined
+            ? base_url + "/" + element.url
+            : element.url;
 
-    let router = express.Router();
-    Object.entries<any>(ComponentTree.components).forEach(([index , item  ])=>{
-        console.log("ITEM")
-        console.log(item)
-        let base_url = item.base_url
-        Object.entries<any>(item.methods).forEach(([index_ , element  ])=>{
+        url = url.replace(/\/$/, "");
 
-            let url:string = base_url!=null && base_url!=undefined ? base_url+"/"+element.url : element.url
-            url = url.replace(/\/$/, "")
-            console.log(`URL ${url}`)
-            router.get(`/${url}`, function(request, response){
-                let parameter_count = element.parameter_count
-                let return_value = null
-                if(parameter_count>0){
-                    let params = element.params
-                    let paramList: any = []
-                    params.forEach((object : any, i : any) => {
-                        if(request.query[object.param]!==undefined)
-                            paramList.push(request.query[object.param])
-                    })
-                    return_value = Reflect.apply(element.action, undefined, paramList)
-                }else{
-                    return_value = Reflect.apply(element.action, undefined, [])
-                }
-                if(return_value==undefined)
-                    response.send()
-                else
-                    response.send(return_value)
-    
-            })
-        });
-    })
-   
-    module.exports = router;
-    this.app.use("/", router);
+        switch(element.method){
+          case Methods.GET :
+              this.createGetRoute(element, url)
+              break
+          case Methods.POST :
+              this.createPostRoute(element, url)
+              break
+                  
+        }
+
+      });
+    });
+
+    module.exports = this.router;
+    this.app.use(
+      session({
+        secret: "28392HKA!kdajajs**(229",
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: true },
+      })
+    );
+    this.app.use("/", this.router);
     console.log("Done Bootstraping");
+  }
+
+
+  private serveRequest(element : any, request : Request, response : Response) : void{
+    let parameter_count = element.parameter_count;
+          let return_value = null;
+          if (parameter_count > 0) {
+            let params = element.params;
+            let paramList: any = [];
+            params.forEach((object: any, i: any) => {
+              if (request.query[object.param] !== undefined)
+                paramList.push(request.query[object.param]);
+            });
+            return_value = Reflect.apply(element.action, undefined, paramList);
+          } else {
+            return_value = Reflect.apply(element.action, undefined, []);
+          }
+          if (return_value == undefined) response.send();
+          else response.send(return_value);
   }
 
   private scanComponents(baseRoute: string) {
@@ -86,4 +106,37 @@ export class App {
       }
     }
   }
+
+  private authenticated(authenticated : boolean, request : Request, response : Response, next : NextFunction){
+    if (authenticated) {
+      new AuthenticatedMiddleware(request, response, next);
+    }else{
+      next()
+    }
+  }
+
+  private createGetRoute(properties : any, url:string){
+    this.router.get(`/${url}`, (request, response, next) => {
+      this.authenticated(properties.authenticated, request, response, next)
+    },(request, response, next) =>{          
+        this.serveRequest(properties, request, response)
+    })
+  }
+
+  private createPostRoute(properties : any, url:string){
+    this.router.post(`/${url}`, (request, response, next) => {
+      this.authenticated(properties.authenticated, request, response, next)
+    },(request, response, next) =>{          
+        this.serveRequest(properties, request, response)
+    })
+  }
+
+  private createPutRoute(properties : any, url:string){
+    this.router.put(`/${url}`, (request, response, next) => {
+      this.authenticated(properties.authenticated, request, response, next)
+    },(request, response, next) =>{          
+        this.serveRequest(properties, request, response)
+    })
+  }
+  
 }

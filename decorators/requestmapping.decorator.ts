@@ -20,7 +20,7 @@ export function RequestMapping(options : any) {
     ComponentTree.components[class_name].methods[method_name].url = url.replace(/\/$/, "");
     ComponentTree.components[class_name].methods[method_name].action = target[propertyKey]
     ComponentTree.components[class_name].methods[method_name].parameter_count = getParamNames(target[propertyKey]).length
-    ComponentTree.components[class_name].methods[method_name].method = method.toString()
+    ComponentTree.components[class_name].methods[method_name].method = method
 
   };
 }
