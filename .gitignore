@@ -52,4 +52,4 @@ playground.ts
 playground.js
 
 *.tgz
-*.-lock.json
+*-lock.json
