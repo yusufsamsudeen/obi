@@ -1,7 +1,8 @@
+import { RequestOptions } from './requestmapping.options';
 import { ComponentTree } from './../params/ComponentTree';
 import { Methods } from "./requestmethod.decorator";
 import { initTree } from "./util";
-export function RequestMapping(options : any) {
+export function RequestMapping(options : RequestOptions) {
   if(!options.hasOwnProperty("url"))
       throw new Error("Property URL must be present")
   if(!options.hasOwnProperty("method"))
@@ -21,6 +22,10 @@ export function RequestMapping(options : any) {
     ComponentTree.components[class_name].methods[method_name].action = target[propertyKey]
     ComponentTree.components[class_name].methods[method_name].parameter_count = getParamNames(target[propertyKey]).length
     ComponentTree.components[class_name].methods[method_name].method = method
+
+    if(options.authenticated!==undefined){
+      ComponentTree.components[class_name].methods[method_name].authenticated = options.authenticated
+    }
 
   };
 }

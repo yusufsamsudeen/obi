@@ -1,9 +1,10 @@
+import  util  from 'util';
 import { View } from './components/View';
 import { ModelAndView } from './components/ModelAndView';
-import { Methods } from './decorators/requestmethod.decorator';
+import { Methods, ResponseType } from './decorators/requestmethod.decorator';
 import { AuthenticatedMiddleware } from "./middleware/AuthenticatedMiddleware";
 import { ComponentTree } from "./params/ComponentTree";
-import express, { NextFunction, Request, Response, Router } from "express";
+import express, { Application, NextFunction, Request, Response, Router } from "express";
 import session from "express-session";
 import fs from "fs";
 import path from "path";
@@ -11,7 +12,7 @@ import crayon from "crayon.js";
 
 export class App {
   private port: number;
-  private app: any;
+  private app: Application;
   private baseScan: string;
   private router: Router = express.Router();
 
@@ -33,6 +34,8 @@ export class App {
 
   private bootstrap(): void {
     console.log(crayon.greenYellow("Bootstraping"));
+    
+    console.log(util.inspect(ComponentTree.components,  false, null, true))
     Object.entries<any>(ComponentTree.components).forEach(([index, item]) => {
      
       let base_url = item.base_url;
@@ -71,28 +74,38 @@ export class App {
   }
 
 
-  private serveRequest(element : any, request : Request, response : Response) : void{
-    let parameter_count = element.parameter_count;
+  private serveRequest(controller_action : any, request : Request, response : Response) : void{
+    let parameter_count = controller_action.parameter_count;
     let return_value = null;
     if (parameter_count > 0) {
-            let params = element.params;
+            let params = controller_action.params;
             let paramList: any = [];
             params.forEach((object: any, i: any) => {
               if (request.query[object.param] !== undefined)
                 paramList.push(request.query[object.param]);
             });
-            return_value = Reflect.apply(element.action, undefined, paramList);
+            return_value = Reflect.apply(controller_action.action, undefined, paramList);
           } else {
-            return_value = Reflect.apply(element.action, undefined, []);
+            return_value = Reflect.apply(controller_action.action, undefined, []);
           }
-          this.handleResponse(return_value, response)
+          this.handleResponse(return_value, response, controller_action)
   }
 
-  private handleResponse(return_value : any, response : Response){
+  private handleResponse(return_value : any, response : Response, controller_action : any){
+    console.log("instance")
+    console.log(typeof return_value === "string")
+    if(controller_action.response_type == ResponseType.JSON && return_value !==undefined){
+        response.json(return_value)
+        return
+    }
     if(return_value instanceof ModelAndView){
       const view = View.findView(return_value.getTemplateName())
-      console.log(view)
       response.render(view, return_value.getAttributes())
+      return
+    }
+    if(typeof return_value === "string"){
+      const view = View.findView(return_value.toString())
+      response.render(view)
       return
     }
     if(return_value==undefined){

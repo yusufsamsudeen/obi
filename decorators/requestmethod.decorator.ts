@@ -4,3 +4,8 @@ export enum Methods {
   PUT = "put",
   DELETE = "delete"
 }
+
+export enum ResponseType{
+  JSON = "json",
+
+}
