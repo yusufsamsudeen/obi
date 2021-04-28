@@ -4,12 +4,10 @@ import { Methods } from './decorators/requestmethod.decorator';
 import { AuthenticatedMiddleware } from "./middleware/AuthenticatedMiddleware";
 import { ComponentTree } from "./params/ComponentTree";
 import express, { NextFunction, Request, Response, Router } from "express";
-// var session = require("express-session")
 import session from "express-session";
 import fs from "fs";
 import path from "path";
 import crayon from "crayon.js";
-import util from "util";
 
 export class App {
   private port: number;

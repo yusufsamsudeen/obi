@@ -1,4 +1,3 @@
-import { ModelAndView } from './components/ModelAndView';
 export { Controller } from "./decorators/controller.decorator";
 export { RequestMapping } from "./decorators/requestmapping.decorator";
 export { Methods } from "./decorators/requestmethod.decorator";
