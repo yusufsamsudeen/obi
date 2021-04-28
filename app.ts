@@ -1,3 +1,5 @@
+import { View } from './components/View';
+import { ModelAndView } from './components/ModelAndView';
 import { Methods } from './decorators/requestmethod.decorator';
 import { AuthenticatedMiddleware } from "./middleware/AuthenticatedMiddleware";
 import { ComponentTree } from "./params/ComponentTree";
@@ -23,6 +25,8 @@ export class App {
 
   start(): void {
     this.scanComponents(this.baseScan);
+    this.app.set('view engine', 'pug')
+    this.app.set('views', 'resources')
     this.bootstrap();
     this.app.listen(this.port, () => {
       console.log(`Server started on port ${this.port}`);
@@ -71,8 +75,8 @@ export class App {
 
   private serveRequest(element : any, request : Request, response : Response) : void{
     let parameter_count = element.parameter_count;
-          let return_value = null;
-          if (parameter_count > 0) {
+    let return_value = null;
+    if (parameter_count > 0) {
             let params = element.params;
             let paramList: any = [];
             params.forEach((object: any, i: any) => {
@@ -83,8 +87,21 @@ export class App {
           } else {
             return_value = Reflect.apply(element.action, undefined, []);
           }
-          if (return_value == undefined) response.send();
-          else response.send(return_value);
+          this.handleResponse(return_value, response)
+  }
+
+  private handleResponse(return_value : any, response : Response){
+    if(return_value instanceof ModelAndView){
+      const view = View.findView(return_value.getTemplateName())
+      console.log(view)
+      response.render(view, return_value.getAttributes())
+      return
+    }
+    if(return_value==undefined){
+      response.end()
+      return
+    }
+    response.send(return_value)
   }
 
   private scanComponents(baseRoute: string) {
