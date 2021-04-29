@@ -13,10 +13,9 @@ export class AuthenticatedMiddleware {
     }
 
     private validate():void  {
-        console.log("Validating cookie")
-        if(this.request.session.hasOwnProperty("user"))
+        if(this.request.session !== undefined && this.request.session!.user !==undefined)
             this.next()
         else    
-            this.response.status(403).send("UnAuthenticated User")    
+            this.response.status(401).send("UnAuthenticated User")    
     }
 }
