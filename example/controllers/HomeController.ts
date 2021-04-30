@@ -1,4 +1,3 @@
-import { Global } from './../../src/params/Global';
 import { ResponseBody, RequestMapping, Methods, Authenticated, RequestParam, ModelAndView } from '../../src';
 import { BaseController } from '../../src/components/BaseController';
 import { Controller } from '../../src/decorators/controller.decorator';
@@ -15,8 +14,8 @@ export class HomeController extends BaseController{
 
     @Authenticated()
     @RequestMapping({url: "authenticated", method : Methods.GET})
-    public params(@RequestParam("hi") param : string, @RequestParam("message") message : string) : void{
-       console.log("Welcome")
+    public params() : void{
+    //    console.log("Welcome")
     }
 
     @RequestMapping({url: "about", method : Methods.GET})
@@ -33,8 +32,8 @@ export class HomeController extends BaseController{
 
     @ResponseBody()
     @RequestMapping({url : "json", method:Methods.GET})
-    public json() : string{
-        return "welcome"
+    public json() : Object{
+        return {body :"welcome"}
     }
 
     @ResponseBody()
@@ -45,17 +44,27 @@ export class HomeController extends BaseController{
         return user
     }
 
-    @RequestMapping({url : "login-redirect", method : Methods.GET})
-    public loginAndRedirect() : string{
-        let user = {username : "volcry", id : 111}
-        this.request.session!.user = user
-        return ":main"
-    }
+   
 
     @RequestMapping({url :"main", method :Methods.GET})
     public main(@RequestParam("param") param : string, @RequestParam("param2") param2 : string) : void{
         let user = {username : "volcry", id : 111}
-        this.request.session!.user = user
-        
+        this.request.session!.user = user        
     }
+
+    @RequestMapping({url : "redirect", method : Methods.GET})
+    public redirect() : string{
+        return ":about"
+    }
+
+    @RequestMapping({url : "test-void", method : Methods.GET})
+    public testVoid() : void{
+
+    }
+
+    @RequestMapping({url : "test-put", method : Methods.PUT})
+    public testPut() : void{
+
+    }
+
 }

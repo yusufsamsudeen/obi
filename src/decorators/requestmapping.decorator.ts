@@ -3,15 +3,11 @@ import { RequestOptions } from './requestmapping.options';
 import { Methods } from "./requestmethod.decorator";
 import { initTree } from "./util";
 export function RequestMapping(options : RequestOptions) {
-  if(!options.hasOwnProperty("url"))
-      throw new Error("Property URL must be present")
-  if(!options.hasOwnProperty("method"))
-      throw new Error("Property method must be present")
+  
       
   let url = options.url
   let method = options.method
-  if(!Object.values(Methods).includes(method))
-      throw new Error("Property method must be of type Method")
+  
 
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
     
