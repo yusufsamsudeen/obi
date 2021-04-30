@@ -53,3 +53,5 @@ playground.js
 
 *.tgz
 *-lock.json
+coverage/
+.nyc_output/
