@@ -1,4 +1,4 @@
-import { ResponseType } from './requestmethod.decorator';
+import { ResponseType } from './types/responsetype';
 import { ComponentTree } from "../params/ComponentTree";
 import { initTree } from "./util";
 

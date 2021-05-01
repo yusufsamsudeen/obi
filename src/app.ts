@@ -1,22 +1,17 @@
 import { View } from "./components/View";
 import { ModelAndView } from "./components/ModelAndView";
-import { Methods, ResponseType } from "./decorators/requestmethod.decorator";
 import { AuthenticatedMiddleware } from "./middleware/AuthenticatedMiddleware";
 import { ComponentTree } from "./params/ComponentTree";
-import express, {
-  Application,
-  NextFunction,
-  Request,
-  Response,
-  Router,
-} from "express";
+import express, { Application, json, NextFunction, Request, Response, Router, urlencoded } from "express";
 import session from "express-session";
 import fs from "fs";
 import path from "path";
 import crayon from "crayon.js";
 import cookieParser from "cookie-parser";
-import util from "util"
-var uuid = require("uuid");
+import util from "util";
+import { ResponseType } from "./decorators/types/responsetype";
+import { Methods } from "./decorators/types/method";
+import {extractMethodParameters} from "./decorators/util"
 
 export class Volcry {
   private port: number;
@@ -49,10 +44,7 @@ export class Volcry {
     Object.entries<any>(ComponentTree.components).forEach(([index, item]) => {
       let base_url = item.base_url;
       Object.entries<any>(item.methods).forEach(([index_, element]) => {
-        let url: string =
-          base_url != null && base_url != undefined
-            ? base_url + "/" + element.url
-            : element.url;
+        let url: string = base_url != null && base_url != undefined ? base_url + "/" + element.url : element.url;
 
         url = url.replace(/\/$/, "");
         // console.log(`URL ${url}`)
@@ -64,14 +56,16 @@ export class Volcry {
           case Methods.POST:
             this.createPostRoute(item.constructor, element, url);
             break;
-           case Methods.PUT:
+          case Methods.PUT:
             this.createPutRoute(item.constructor, element, url);
-            break; 
+            break;
         }
       });
     });
 
     this.app.use(cookieParser());
+    this.app.use(json())
+    this.app.use(urlencoded({extended : true}))
     this.app.use(
       session({
         secret: "somerandonstuffs",
@@ -86,35 +80,16 @@ export class Volcry {
     console.log("Done Bootstraping");
   }
 
-
-  private serveRequest(
-    constructor: Function,
-    controller_action: any,
-    request: Request,
-    response: Response
-  ): void {
+  private serveRequest(constructor: Function, controller_action: any, request: Request, response: Response): void {
     let parameter_count = controller_action.parameter_count;
     let return_value = null;
     var action_controller = Reflect.construct(constructor, []);
-    
 
     Reflect.set(action_controller, "request", request);
 
     if (parameter_count > 0) {
-      let params = controller_action.params;
-      let paramList: any = [];
-      params.sort((a: any, b: any) =>
-        a.index > b.index ? 1 : b.index > a.index ? -1 : 0
-      );
-
-      params.forEach((object: any, i: any) => {
-          paramList.push(request.query[object.name]);
-      });
-
-      return_value = controller_action.action.apply(
-        action_controller,
-        paramList
-      );
+      let paramList = extractMethodParameters(controller_action.params, request);
+      return_value = controller_action.action.apply(action_controller, paramList);
     } else {
       return_value = action_controller[controller_action.name]();
     }
@@ -122,12 +97,8 @@ export class Volcry {
     this.handleResponse(return_value, response, controller_action);
   }
 
-  private handleResponse(
-    return_value: any,
-    response: Response,
-    controller_action: any
-  ) {
-    if (controller_action.response_type === ResponseType.JSON &&  return_value !== undefined) {
+  private handleResponse(return_value: any, response: Response, controller_action: any) {
+    if (controller_action.response_type === ResponseType.JSON && return_value !== undefined) {
       response.json(return_value);
       return;
     }
@@ -164,12 +135,7 @@ export class Volcry {
     }
   }
 
-  private authenticated(
-    authenticated: boolean,
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
+  private authenticated(authenticated: boolean, request: Request, response: Response, next: NextFunction) {
     if (authenticated) {
       new AuthenticatedMiddleware(request, response, next);
     } else {
@@ -184,7 +150,7 @@ export class Volcry {
         this.authenticated(properties.authenticated, request, response, next);
       },
       (request, response, next) => {
-        this.serveRequest(constructor, properties, request, response);        
+        this.serveRequest(constructor, properties, request, response);
       }
     );
   }

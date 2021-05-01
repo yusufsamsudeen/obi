@@ -1,6 +1,5 @@
 import { ComponentTree } from '../params/ComponentTree';
 import { RequestOptions } from './requestmapping.options';
-import { Methods } from "./requestmethod.decorator";
 import { initTree } from "./util";
 export function RequestMapping(options : RequestOptions) {
   

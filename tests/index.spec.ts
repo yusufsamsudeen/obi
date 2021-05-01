@@ -1,10 +1,8 @@
+import { expect } from 'chai';
 var session = require('supertest-session');
 import { Volcry } from './../src/app';
 import { Application } from "express"
-let mockSession = require('mock-session');
-import request from "supertest"
-import util from "util"
-import { expect } from 'chai';
+
 
 describe("Build App", ()=>{
 
@@ -77,7 +75,26 @@ describe("Build App", ()=>{
 
     it("test put", (done) => {
         testSession.put("/test-put").expect(200, done)
-})
+    })
+
+    it("Model Attributes", (done) => {
+        testSession.post("/mounted/test-model-attribute")
+            .send({username : "volcry", password : "111"})
+            .expect(200)
+            .end((err : any, res : any)=>{
+                expect(res.body).to.have.property('username', 'volcry')
+                done()
+            })
+    })
+
+    it("Path Variable", (done) => {
+        testSession.get("/mounted/path/volcry")
+            .expect(200)
+            .end((err :any, res : any) => {
+                expect(res.body).to.have.property("username", "volcry")
+                done()
+            })
+    })
 
 
 })
