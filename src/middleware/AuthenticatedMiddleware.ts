@@ -15,7 +15,12 @@ export class AuthenticatedMiddleware {
     private validate():void  {
         if(this.request.session !== undefined && this.request.session!.user !==undefined)
             this.next()
-        else    
-            this.response.status(401).send("UnAuthenticated User")    
+        else{
+            if(this.request.is("application/json"))
+                this.response.status(401).send("UnAuthenticated User")
+            else
+                this.response.redirect("auth/login")    
+
+        }    
     }
 }
