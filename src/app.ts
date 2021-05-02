@@ -40,7 +40,7 @@ export class Volcry {
   private bootstrap(): void {
     console.log(crayon.greenYellow("Bootstraping"));
 
-    // console.log(util.inspect(ComponentTree.components,  false, null, true))
+    console.log(util.inspect(ComponentTree.components,  false, null, true))
     Object.entries<any>(ComponentTree.components).forEach(([index, item]) => {
       let base_url = item.base_url;
       Object.entries<any>(item.methods).forEach(([index_, element]) => {

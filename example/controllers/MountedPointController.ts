@@ -1,7 +1,6 @@
-import  util  from 'util';
 import { User } from './../models/User';
 import { Controller, Methods, RequestMapping, ResponseBody } from "../../src";
-import { ModelAttribute } from "../../src/decorators/modelattribute.decorator copy";
+import { ModelAttribute } from "../../src/decorators/modelattribute.decorator";
 import { PathVariable } from '../../src/decorators/pathvariable.decorator';
 
 @Controller({
@@ -28,7 +27,7 @@ export class MountedPointController{
     }
 
     @RequestMapping({url : "path/:username", method : Methods.GET})
-    public pathVariable(@PathVariable("username") username : string) : Object{
+    public pathVariable(@PathVariable({param : "username", required : true}) username : string) : Object{
         return {username : username}
     }
 }

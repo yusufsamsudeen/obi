@@ -1,6 +1,8 @@
+import { ParamNamedParameters } from './types/paramparameters';
 import { ComponentTree } from "./../params/ComponentTree";
 import { ParameterType } from "./types/paramtype";
 import {Request} from "express"
+import { exception } from 'node:console';
 export function initTree(class_name: string, method_name: string = "") {
     if (!ComponentTree.components.hasOwnProperty(class_name)) {
         ComponentTree.components[class_name] = {
@@ -12,8 +14,8 @@ export function initTree(class_name: string, method_name: string = "") {
     if (ComponentTree.components[class_name].methods[method_name] == undefined) ComponentTree.components[class_name].methods[method_name] = {};
 }
 
-export function addParameter(class_name: string, method_name: string, param_name: string, index: number, type: ParameterType, 
-    model? : Function): void {
+export function addParameter({class_name, method_name, param_name, index, type, 
+    model, required} : ParamNamedParameters): void {
     initTree(class_name, method_name)
     if(!ComponentTree.components[class_name].methods[method_name].hasOwnProperty("params"))
         ComponentTree.components[class_name].methods[method_name].params = []
@@ -22,7 +24,8 @@ export function addParameter(class_name: string, method_name: string, param_name
         name: param_name,
         index: index,
         type : type,
-        model : model
+        model : model,
+        required : required
     });
 }
 
@@ -33,9 +36,13 @@ export function extractMethodParameters(params : any[], request : Request) : any
       params.forEach((object: any, i: any) => {
           switch (object.type){
               case ParameterType.QUERY_PARAM:
+                if (object.required && request.params[object.name] === undefined)
+                    throw new Error(`Property ${object.name} is required`)
                 paramList.push(request.query[object.name]);
                 break;
               case ParameterType.PATH_VARIABLE:
+                  if (object.required && request.params[object.name] === undefined)
+                    throw new Error(`Property ${object.name} is required`)
                 paramList.push(request.params[object.name])  
                 break
               case ParameterType.MODEL_ATTRIBUTE:

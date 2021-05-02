@@ -47,7 +47,7 @@ export class HomeController extends BaseController{
    
 
     @RequestMapping({url :"main", method :Methods.GET})
-    public main(@RequestParam("param") param : string, @RequestParam("param2") param2 : string) : void{
+    public main(@RequestParam({param :"param", required  :true}) param : string, @RequestParam({param :"param2"}) param2 : string) : void{
         let user = {username : "volcry", id : 111}
         this.request.session!.user = user        
     }
