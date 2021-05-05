@@ -1,6 +1,5 @@
+import { addParameter } from "../util/util"
 import { ParameterType } from "./types/paramtype"
-import { addParameter } from "./util"
-
 
 export function ModelAttribute(paramType : Function){
     return function(target : any, propertyKey : string | symbol , parameterIndex : number){

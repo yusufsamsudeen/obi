@@ -1,3 +1,4 @@
+import { TestMiddleware } from './../middleware/Middleware';
 import { ResponseBody, RequestMapping, Methods, Authenticated, RequestParam, ModelAndView } from '../../src';
 import { BaseController } from '../../src/components/BaseController';
 import { Controller } from '../../src/decorators/controller.decorator';
@@ -64,6 +65,11 @@ export class HomeController extends BaseController{
 
     @RequestMapping({url : "test-put", method : Methods.PUT})
     public testPut() : void{
+
+    }
+
+    @RequestMapping({url : "middleware", method : Methods.GET, middleware : TestMiddleware})
+    public testMiddleware() : void{
 
     }
 

@@ -1,6 +1,6 @@
+import { addParameter } from '../util/util';
 import { PathVariableOptions } from './options/pathvariable.options';
 import { ParameterType } from './types/paramtype';
-import { addParameter } from './util';
 export function RequestParam(param : PathVariableOptions){
     return function(target : any, propertyKey : string | symbol, parameterIndex : number){
         let class_name = target.constructor.name.toLowerCase()

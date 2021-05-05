@@ -1,6 +1,7 @@
 import { ComponentTree } from '../params/ComponentTree';
 import { RequestOptions } from './options/requestmapping.options';
-import { initTree } from "./util";
+import { initTree } from '../util/util';
+
 export function RequestMapping(options : RequestOptions) {
   
       
@@ -22,6 +23,10 @@ export function RequestMapping(options : RequestOptions) {
 
     if(options.authenticated!==undefined){
       ComponentTree.components[class_name].methods[method_name].authenticated = options.authenticated
+    }
+
+    if(options.middleware!==undefined){
+      ComponentTree.components[class_name].methods[method_name].middleware = options.middleware
     }
 
   };

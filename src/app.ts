@@ -11,7 +11,7 @@ import cookieParser from "cookie-parser";
 import util from "util";
 import { ResponseType } from "./decorators/types/responsetype";
 import { Methods } from "./decorators/types/method";
-import {extractMethodParameters} from "./decorators/util"
+import {executeMiddleware, extractMethodParameters} from "./util/util"
 
 export class Volcry {
   private port: number;
@@ -80,21 +80,24 @@ export class Volcry {
     console.log("Done Bootstraping");
   }
 
-  private serveRequest(constructor: Function, controller_action: any, request: Request, response: Response): void {
-    let parameter_count = controller_action.parameter_count;
+  private serveRequest(constructor: Function, properties: any, request: Request, response: Response, next : NextFunction): void {
+    let parameter_count = properties.parameter_count;
     let return_value = null;
-    var action_controller = Reflect.construct(constructor, []);
+    if(properties.middleware){
+      executeMiddleware(properties.middleware, request, response, next)
+    }
+    let action_class_object = Reflect.construct(constructor, []);
 
-    Reflect.set(action_controller, "request", request);
+    Reflect.set(action_class_object, "request", request);
 
     if (parameter_count > 0) {
-      let paramList = extractMethodParameters(controller_action.params, request);
-      return_value = controller_action.action.apply(action_controller, paramList);
+      let paramList = extractMethodParameters(properties.params, request);
+      return_value = properties.action.apply(action_class_object, paramList);
     } else {
-      return_value = action_controller[controller_action.name]();
+      return_value = action_class_object[properties.name]();
     }
-    request = Reflect.get(action_controller, "request");
-    this.handleResponse(return_value, response, controller_action);
+    request = Reflect.get(action_class_object, "request");
+    this.handleResponse(return_value, response, properties);
   }
 
   private handleResponse(return_value: any, response: Response, controller_action: any) {
@@ -137,32 +140,28 @@ export class Volcry {
 
   private authenticated(authenticated: boolean, request: Request, response: Response, next: NextFunction) {
     if (authenticated) {
-      new AuthenticatedMiddleware(request, response, next);
+      executeMiddleware(AuthenticatedMiddleware, request, response, next)
     } else {
       next();
     }
   }
 
   private createGetRoute(constructor: Function, properties: any, url: string) {
-    this.router.get(
-      `/${url}`,
-      (request, response, next) => {
+    this.router.get(`/${url}`, (request, response, next) => {
         this.authenticated(properties.authenticated, request, response, next);
       },
       (request, response, next) => {
-        this.serveRequest(constructor, properties, request, response);
+        this.serveRequest(constructor, properties, request, response, next);
       }
     );
   }
 
   private createPostRoute(constructor: Function, properties: any, url: string) {
-    this.router.post(
-      `/${url}`,
-      (request, response, next) => {
+    this.router.post(`/${url}`,(request, response, next) => {
         this.authenticated(properties.authenticated, request, response, next);
       },
       (request, response, next) => {
-        this.serveRequest(constructor, properties, request, response);
+        this.serveRequest(constructor, properties, request, response, next);
       }
     );
   }
@@ -174,7 +173,7 @@ export class Volcry {
         this.authenticated(properties.authenticated, request, response, next);
       },
       (request, response, next) => {
-        this.serveRequest(constructor, properties, request, response);
+        this.serveRequest(constructor, properties, request, response, next);
       }
     );
   }

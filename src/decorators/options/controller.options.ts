@@ -1,4 +1,4 @@
 export interface ControllerOptions{
-    url : string,
+    url? : string,
     authenticated? : boolean
 }

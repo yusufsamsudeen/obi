@@ -1,8 +1,8 @@
-import { ParamNamedParameters } from './types/paramparameters';
-import { ComponentTree } from "./../params/ComponentTree";
-import { ParameterType } from "./types/paramtype";
-import {Request} from "express"
-import { exception } from 'node:console';
+import { ParamNamedParameters } from '../decorators/types/paramparameters';
+import { ComponentTree } from "../params/ComponentTree";
+import { ParameterType } from "../decorators/types/paramtype";
+import { NextFunction, Request, Response } from "express";
+
 export function initTree(class_name: string, method_name: string = "") {
     if (!ComponentTree.components.hasOwnProperty(class_name)) {
         ComponentTree.components[class_name] = {
@@ -63,6 +63,15 @@ function extractModelAttribute(request : Request, model : Function){
         Reflect.set(model, object_key, request.body[object_key])
     }
     return model
+}
+
+export function executeMiddleware(classDef : Function, request : Request, response : Response, next : NextFunction){
+    let middleware = Reflect.construct(classDef, [])
+    console.log(classDef)
+    Reflect.set(middleware, "request", request);
+    Reflect.set(middleware, "response", response);
+    Reflect.set(middleware, "next", next);
+    Reflect.get(middleware, 'fire').apply(middleware, [])
 }
 
 
