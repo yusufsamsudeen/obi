@@ -1,9 +1,11 @@
+import { AppOptions } from './options/app.option';
+import { Settings } from './util/Settings';
 import { View } from "./components/View";
 import { ModelAndView } from "./components/ModelAndView";
 import { AuthenticatedMiddleware } from "./middleware/AuthenticatedMiddleware";
 import { ComponentTree } from "./params/ComponentTree";
 import express, { Application, json, NextFunction, Request, Response, Router, urlencoded } from "express";
-import session from "express-session";
+import session from 'express-session';
 import fs from "fs";
 import path from "path";
 import crayon from "crayon.js";
@@ -12,17 +14,17 @@ import util from "util";
 import { ResponseType } from "./decorators/types/responsetype";
 import { Methods } from "./decorators/types/method";
 import {executeMiddleware, extractMethodParameters} from "./util/util"
-
 export class Volcry {
-  private port: number;
+  private port: string | number;
   private app: Application;
   private baseScan: string;
   private router: Router = express.Router();
+  private settings : Settings = new Settings()
 
-  constructor(port: number, baseScan: string) {
-    this.port = port;
+  constructor(options : AppOptions) {
+    this.port = options.port
     this.app = express();
-    this.baseScan = baseScan;
+    this.baseScan = options.base_scan;
   }
 
   start(): Application {
@@ -40,7 +42,7 @@ export class Volcry {
   private bootstrap(): void {
     console.log(crayon.greenYellow("Bootstraping"));
 
-    console.log(util.inspect(ComponentTree.components,  false, null, true))
+    // console.log(util.inspect(ComponentTree.components,  false, null, true))
     Object.entries<any>(ComponentTree.components).forEach(([index, item]) => {
       let base_url = item.base_url;
       Object.entries<any>(item.methods).forEach(([index_, element]) => {

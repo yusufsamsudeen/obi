@@ -1,4 +1,4 @@
-import { IMiddleware } from './../../src/middleware/Middleware';
+import { IMiddleware } from '../../../src/middleware/Middleware';
 import { NextFunction, Request, Response } from "express";
 
 export class TestMiddleware implements IMiddleware{

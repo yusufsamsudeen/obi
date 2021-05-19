@@ -2,16 +2,16 @@
   "name": "volcry",
   "version": "0.0.1",
   "description": "An ExpressJS Typescript MVC Framework",
-  "main": "./dist/index.js",
+  "main": "../src/index.ts",
   "scripts": {
-    "start": "nodemon ./example/index.ts",
+    "start": "nodemon ./tests/example/index.ts",
     "build": "tsc --project .",
     "test": "mocha -r ts-node/register tests/**/*.spec.ts",
     "coverage": "nyc --reporter=lcov --reporter=text-summary -e .ts -x \"*.spec.ts\" npm run test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yusufsamsudeen/capuccino.git"
+    "url": "git+https://github.com/yusufsamsudeen/volcry.git"
   },
   "keywords": [
     "ExpressJS",
@@ -21,17 +21,19 @@
   "author": "Yusuf Samsudeen Babashola",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yusufsamsudeen/capuccino/issues"
+    "url": "https://github.com/yusufsamsudeen/volcry/issues"
   },
-  "homepage": "https://github.com/yusufsamsudeen/capuccino#readme",
+  "homepage": "https://github.com/yusufsamsudeen/volcry#readme",
   "dependencies": {
     "callsites": "^3.1.0",
     "cookie-parser": "^1.4.5",
     "crayon.js": "^1.1.0",
+    "dotenv": "^9.0.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "pug": "^3.0.2",
     "reflect-metadata": "^0.1.13",
+    "sequelize": "^6.6.2",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

@@ -1,7 +1,9 @@
+import { Settings } from './Settings';
 import { ParamNamedParameters } from '../decorators/types/paramparameters';
 import { ComponentTree } from "../params/ComponentTree";
 import { ParameterType } from "../decorators/types/paramtype";
 import { NextFunction, Request, Response } from "express";
+import  fs  from "fs"
 
 export function initTree(class_name: string, method_name: string = "") {
     if (!ComponentTree.components.hasOwnProperty(class_name)) {
@@ -36,7 +38,7 @@ export function extractMethodParameters(params : any[], request : Request) : any
       params.forEach((object: any, i: any) => {
           switch (object.type){
               case ParameterType.QUERY_PARAM:
-                if (object.required && request.params[object.name] === undefined)
+                if (object.required && request.query[object.name] === undefined)
                     throw new Error(`Property ${object.name} is required`)
                 paramList.push(request.query[object.name]);
                 break;
@@ -67,11 +69,20 @@ function extractModelAttribute(request : Request, model : Function){
 
 export function executeMiddleware(classDef : Function, request : Request, response : Response, next : NextFunction){
     let middleware = Reflect.construct(classDef, [])
-    console.log(classDef)
     Reflect.set(middleware, "request", request);
     Reflect.set(middleware, "response", response);
     Reflect.set(middleware, "next", next);
     Reflect.get(middleware, 'fire').apply(middleware, [])
+}
+
+export function readSettings() : Settings {
+    console.log(process.cwd())
+    let properties = JSON.parse(fs.readFileSync("./settings.json").toString())
+    let settings : Settings = new Settings()
+    for (let property in properties){
+        Reflect.set(settings, property, properties[property])
+    }
+    return settings
 }
 
 

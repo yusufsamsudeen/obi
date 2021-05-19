@@ -1,7 +1,6 @@
 import { TestMiddleware } from './../middleware/Middleware';
-import { ResponseBody, RequestMapping, Methods, Authenticated, RequestParam, ModelAndView } from '../../src';
-import { BaseController } from '../../src/components/BaseController';
-import { Controller } from '../../src/decorators/controller.decorator';
+import { ResponseBody, RequestMapping, Methods, Authenticated, RequestParam, ModelAndView, Controller } from '../../../src/';
+import { BaseController } from '../../../src/components/BaseController';
 
 @Controller()
 export class HomeController extends BaseController{

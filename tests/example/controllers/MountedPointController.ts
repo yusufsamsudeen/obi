@@ -1,12 +1,13 @@
 import { User } from './../models/User';
-import { Controller, Methods, RequestMapping, ResponseBody } from "../../src";
-import { ModelAttribute } from "../../src/decorators/modelattribute.decorator";
-import { PathVariable } from '../../src/decorators/pathvariable.decorator';
+import { ResponseBody, RequestMapping, Methods, Controller } from '../../../src/';
+import { BaseController } from '../../../src/components/BaseController';
+import {ModelAttribute} from "../../../src/decorators/modelattribute.decorator"
+import {PathVariable} from "../../../src/decorators/pathvariable.decorator"
 
 @Controller({
     url : "mounted"
 })
-export class MountedPointController{
+export class MountedPointController extends BaseController{
 
     @RequestMapping({url : "index", method : Methods.GET})
     @ResponseBody()

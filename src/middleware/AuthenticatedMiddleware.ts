@@ -8,7 +8,8 @@ export class AuthenticatedMiddleware implements IMiddleware {
     fire() {
         if (this.request.session !== undefined && this.request.session!.user !== undefined) this.next();
         else {
-            if (this.request.is("application/json")) this.response.status(401).send("UnAuthenticated User");
+            if (this.request.headers["x-requested-with"] === 'XMLHttpRequest') 
+                this.response.status(401).send("UnAuthenticated User");
             else this.response.redirect("auth/login");
         }
     }

@@ -7,7 +7,7 @@ import { Application } from "express"
 describe("Build App", ()=>{
 
     let app : Application
-    let volcry = new Volcry(3000, "example")
+    let volcry = new Volcry({port : 3000, base_scan : "./tests/example"})
     app = volcry.start()
     // let agent = request.agent(app)
     let testSession = session(app)
@@ -30,7 +30,7 @@ describe("Build App", ()=>{
     })
 
     it("Authenticated Route", (done)=>{
-        testSession.get("/authenticated").expect(401, done)
+        testSession.get("/authenticated").expect(302, done)
     })
 
     it("Login", (done) => {
